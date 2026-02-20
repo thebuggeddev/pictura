@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./components/backgroundglow.tsx","./components/header.tsx","./components/heartgrid.tsx","./components/herotext.tsx","./components/imagetile.tsx","./components/pointcloudhover.tsx","./lib/heartmath.ts","./lib/unsplash.ts"],"version":"5.9.3"}
