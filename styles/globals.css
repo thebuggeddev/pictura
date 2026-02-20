@@ -44,9 +44,65 @@ body {
   will-change: transform, box-shadow;
 }
 
+.heart-row {
+  will-change: transform, opacity;
+}
+
 .heart-tile:hover {
   z-index: 50;
   box-shadow:
     0 12px 38px rgba(0, 0, 0, 0.5),
     0 0 28px rgba(130, 92, 220, 0.24);
+}
+
+.pixel-heart-dot {
+  border-radius: 1px;
+  transition:
+    background-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pixel-heart-dot[data-active="1"] {
+  background: #f2f2f2;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.55);
+}
+
+.pixel-heart-dot[data-active="0"] {
+  background: transparent;
+}
+
+.pixel-heart-dot[data-active="1"] {
+  cursor: pointer;
+}
+
+.pixel-heart-dot[data-active="0"] {
+  pointer-events: none;
+}
+
+.pixel-heart-dot[data-active="1"]:hover {
+  animation: pixel-heart-fill 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.pixel-heart-tile:hover {
+  z-index: auto;
+  box-shadow: none;
+}
+
+@keyframes pixel-heart-fill {
+  0% {
+    background: #f2f2f2;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.55);
+    opacity: 1;
+  }
+  45% {
+    background: #a9a9a9;
+    box-shadow: 0 0 8px rgba(188, 188, 188, 0.45);
+    opacity: 0.94;
+  }
+  100% {
+    background: #c9c9c9;
+    box-shadow: 0 0 6px rgba(195, 195, 195, 0.35);
+    opacity: 1;
+  }
 }

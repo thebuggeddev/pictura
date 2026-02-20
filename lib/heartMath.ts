@@ -20,6 +20,8 @@ export interface HeartRow {
   segments: HeartSegment[];
 }
 
+export type HeartViewport = "mobile" | "tablet" | "desktop";
+
 interface HeartRowBlueprint {
   segments: number[];
   size: number;
@@ -30,26 +32,38 @@ interface HeartRowBlueprint {
 }
 
 const DESKTOP_BLUEPRINT: HeartRowBlueprint[] = [
-  { segments: [2, 2], size: 84, gap: 6, segmentGap: 36, rowGap: 8 },
-  { segments: [7], size: 72, gap: 5, rowGap: 7 },
-  { segments: [7], size: 56, gap: 5, rowGap: 7, pixelHeartAt: 3 },
-  { segments: [7], size: 47, gap: 5, rowGap: 6 },
-  { segments: [8], size: 30, gap: 4, rowGap: 6 },
-  { segments: [8], size: 26, gap: 4, rowGap: 5 },
-  { segments: [6], size: 24, gap: 4, rowGap: 5 },
-  { segments: [4], size: 22, gap: 3, rowGap: 4 },
-  { segments: [2], size: 20, gap: 3, rowGap: 0 },
+  { segments: [2, 2], size: 94, gap: 7, segmentGap: 40, rowGap: 9 },
+  { segments: [7], size: 81, gap: 6, rowGap: 8 },
+  { segments: [7], size: 63, gap: 6, rowGap: 8, pixelHeartAt: 3 },
+  { segments: [7], size: 53, gap: 6, rowGap: 7 },
+  { segments: [8], size: 34, gap: 5, rowGap: 7 },
+  { segments: [8], size: 29, gap: 4, rowGap: 6 },
+  { segments: [6], size: 27, gap: 4, rowGap: 6 },
+  { segments: [4], size: 25, gap: 4, rowGap: 5 },
+  { segments: [2], size: 22, gap: 3, rowGap: 0 },
 ];
 
 const MOBILE_BLUEPRINT: HeartRowBlueprint[] = [
-  { segments: [2, 2], size: 54, gap: 4, segmentGap: 22, rowGap: 6 },
-  { segments: [6], size: 44, gap: 4, rowGap: 5 },
-  { segments: [6], size: 36, gap: 4, rowGap: 5, pixelHeartAt: 3 },
-  { segments: [6], size: 30, gap: 4, rowGap: 5 },
-  { segments: [7], size: 23, gap: 3, rowGap: 5 },
-  { segments: [6], size: 20, gap: 3, rowGap: 4 },
-  { segments: [4], size: 18, gap: 3, rowGap: 4 },
-  { segments: [2], size: 16, gap: 3, rowGap: 0 },
+  { segments: [2, 2], size: 61, gap: 4, segmentGap: 24, rowGap: 7 },
+  { segments: [6], size: 49, gap: 4, rowGap: 6 },
+  { segments: [6], size: 40, gap: 4, rowGap: 6, pixelHeartAt: 3 },
+  { segments: [6], size: 34, gap: 4, rowGap: 6 },
+  { segments: [7], size: 26, gap: 3, rowGap: 5 },
+  { segments: [6], size: 22, gap: 3, rowGap: 5 },
+  { segments: [4], size: 20, gap: 3, rowGap: 4 },
+  { segments: [2], size: 18, gap: 3, rowGap: 0 },
+];
+
+const TABLET_BLUEPRINT: HeartRowBlueprint[] = [
+  { segments: [2, 2], size: 81, gap: 6, segmentGap: 34, rowGap: 9 },
+  { segments: [7], size: 69, gap: 5, rowGap: 8 },
+  { segments: [7], size: 55, gap: 5, rowGap: 8, pixelHeartAt: 3 },
+  { segments: [7], size: 47, gap: 5, rowGap: 7 },
+  { segments: [8], size: 30, gap: 4, rowGap: 7 },
+  { segments: [8], size: 27, gap: 4, rowGap: 6 },
+  { segments: [6], size: 25, gap: 4, rowGap: 6 },
+  { segments: [4], size: 22, gap: 3, rowGap: 5 },
+  { segments: [2], size: 20, gap: 3, rowGap: 0 },
 ];
 
 const createHeartRows = (blueprint: HeartRowBlueprint[]): HeartRow[] => {
@@ -98,8 +112,14 @@ const createHeartRows = (blueprint: HeartRowBlueprint[]): HeartRow[] => {
   });
 };
 
-export const getHeartRows = (isMobile: boolean): HeartRow[] => {
-  return createHeartRows(isMobile ? MOBILE_BLUEPRINT : DESKTOP_BLUEPRINT);
+export const getHeartRows = (viewport: HeartViewport): HeartRow[] => {
+  if (viewport === "mobile") {
+    return createHeartRows(MOBILE_BLUEPRINT);
+  }
+  if (viewport === "tablet") {
+    return createHeartRows(TABLET_BLUEPRINT);
+  }
+  return createHeartRows(DESKTOP_BLUEPRINT);
 };
 
 export const getHeartImageCount = (rows: HeartRow[]): number => {

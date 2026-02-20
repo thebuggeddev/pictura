@@ -1,71 +1,172 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BackgroundGlow from "../components/BackgroundGlow";
 import Header from "../components/Header";
 import HeartGrid from "../components/HeartGrid";
 import HeroText from "../components/HeroText";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const context = gsap.context(() => {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (reducedMotion) {
+        gsap.set(
+          [
+            ".glow-fade",
+            ".heart-cluster",
+            ".heart-row",
+            ".heart-tile",
+            ".hero-left",
+            ".hero-right",
+            ".hero-tagline",
+          ],
+          {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+          },
+        );
+        return;
+      }
+
       gsap.set(".glow-fade", { opacity: 0 });
-      gsap.set(".heart-tile", { opacity: 0, scale: 0.8, y: 40 });
+      gsap.set(".heart-cluster", { opacity: 0, scale: 0.9, transformOrigin: "50% 50%" });
+      gsap.set(".heart-row", { opacity: 0, y: 24 });
+      gsap.set(".heart-tile", {
+        opacity: 0,
+        scale: 0.84,
+        y: 44,
+        x: (index: number) => {
+          const side = index % 2 === 0 ? -1 : 1;
+          return side * (16 + (index % 6) * 4);
+        },
+        rotation: (index: number) => {
+          const side = index % 2 === 0 ? -1 : 1;
+          return side * (2 + (index % 4));
+        },
+      });
       gsap.set([".hero-left", ".hero-right", ".hero-tagline"], { opacity: 0 });
 
       const timeline = gsap.timeline({
         defaults: {
           ease: "power3.out",
         },
+        scrollTrigger: {
+          trigger: ".heart-scroll-trigger",
+          start: "top 78%",
+          toggleActions: "play none none reverse",
+        },
       });
 
       timeline
-        .to(".glow-fade", { opacity: 1, duration: 1.15 })
+        .to(".glow-fade", { opacity: 1, duration: 0.45 }, 0)
+        .to(".heart-cluster", { opacity: 1, scale: 1, duration: 0.75 }, 0.02)
+        .to(
+          ".heart-row",
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            stagger: 0.07,
+          },
+          0.14,
+        )
         .to(
           ".heart-tile",
           {
             opacity: 1,
             scale: 1,
             y: 0,
-            duration: 0.95,
+            x: 0,
+            rotation: 0,
+            duration: 0.78,
             stagger: {
-              amount: 0.9,
+              amount: 0.82,
               from: "center",
             },
           },
-          "-=0.55",
+          0.2,
+        )
+        .to(
+          ".pixel-heart-tile",
+          {
+            scale: 1.11,
+            boxShadow: "0 0 28px rgba(255,255,255,0.24)",
+            duration: 0.35,
+            ease: "power2.out",
+          },
+          0.8,
+        )
+        .to(
+          ".pixel-heart-tile",
+          {
+            scale: 1,
+            duration: 0.35,
+            ease: "power2.inOut",
+          },
+          1.05,
         )
         .fromTo(
           ".hero-left",
-          { x: -95 },
+          { x: -85 },
           {
             x: 0,
             opacity: 1,
-            duration: 0.85,
+            duration: 0.62,
           },
-          "-=0.35",
+          0.98,
         )
         .fromTo(
           ".hero-right",
-          { x: 95 },
+          { x: 85 },
           {
             x: 0,
             opacity: 1,
-            duration: 0.85,
+            duration: 0.62,
           },
-          "<",
+          1.02,
         )
         .fromTo(
           ".hero-tagline",
-          { y: 22 },
+          { y: 18 },
           {
             y: 0,
             opacity: 1,
-            duration: 0.75,
+            duration: 0.56,
           },
-          "-=0.3",
+          1.16,
         );
+
+      gsap.to(".pixel-heart-tile", {
+        boxShadow: "0 0 24px rgba(255,255,255,0.22)",
+        repeat: -1,
+        yoyo: true,
+        duration: 1.15,
+        ease: "sine.inOut",
+        scrollTrigger: {
+          trigger: ".heart-scroll-trigger",
+          start: "top 65%",
+          toggleActions: "play pause resume pause",
+        },
+      });
+
+      gsap.to(".heart-cluster", {
+        y: -22,
+        scrollTrigger: {
+          trigger: ".heart-scroll-trigger",
+          start: "top 62%",
+          end: "bottom top",
+          scrub: 1.1,
+        },
+      });
     }, rootRef);
 
     return () => context.revert();
@@ -80,7 +181,7 @@ export default function App() {
         <BackgroundGlow />
         <Header />
 
-        <main className="relative flex min-h-[calc(100vh-90px)] w-full flex-col items-center px-2 pb-6 sm:px-4 sm:pb-8 md:justify-start md:pb-12 md:pt-8 lg:pt-10">
+        <main className="relative flex min-h-[calc(100vh-90px)] w-full flex-col items-center px-2 pb-6 sm:px-4 sm:pb-8 lg:justify-start lg:pb-12 lg:pt-10">
           <HeartGrid />
           <HeroText />
         </main>

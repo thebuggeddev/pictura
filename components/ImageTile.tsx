@@ -9,6 +9,7 @@ interface ImageTileProps {
   style: CSSProperties;
   alt: string;
   pixelHeart?: boolean;
+  className?: string;
 }
 
 const PIXEL_HEART_PATTERN = [
@@ -28,6 +29,7 @@ export default function ImageTile({
   style,
   alt,
   pixelHeart = false,
+  className = "",
 }: ImageTileProps) {
   const tileStyle = {
     ...style,
@@ -37,18 +39,15 @@ export default function ImageTile({
   if (pixelHeart) {
     return (
       <figure
-        className="heart-tile group relative flex shrink-0 items-center justify-center overflow-hidden bg-[#131313]"
+        className={`heart-tile group relative flex shrink-0 items-center justify-center overflow-hidden bg-transparent ${className}`}
         style={tileStyle}
       >
-        <div className="grid grid-cols-9 gap-[1px] sm:gap-[1.5px]">
+        <div className="pixel-heart-grid grid h-full w-full grid-cols-9 grid-rows-8 gap-[1px] sm:gap-[1.5px]">
           {PIXEL_HEART_PATTERN.join("").split("").map((cell, index) => (
             <span
               key={`pixel-heart-cell-${index}`}
-              className={`h-[2px] w-[2px] rounded-[1px] sm:h-[2.5px] sm:w-[2.5px] md:h-[3px] md:w-[3px] ${
-                cell === "1"
-                  ? "bg-[#f3f3f3] shadow-[0_0_4px_rgba(255,255,255,0.55)]"
-                  : "bg-transparent"
-              }`}
+              data-active={cell === "1" ? "1" : "0"}
+              className="pixel-heart-dot h-full w-full"
             />
           ))}
         </div>
@@ -58,7 +57,7 @@ export default function ImageTile({
 
   return (
     <figure
-      className="heart-tile group relative shrink-0 overflow-hidden"
+      className={`heart-tile group relative shrink-0 overflow-hidden ${className}`}
       style={tileStyle}
     >
       <img
