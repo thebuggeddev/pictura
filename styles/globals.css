@@ -55,6 +55,11 @@ body {
     0 0 28px rgba(130, 92, 220, 0.24);
 }
 
+.point-cloud-hover {
+  mix-blend-mode: normal;
+  transition: opacity 0.12s ease-out;
+}
+
 .pixel-heart-dot {
   border-radius: 1px;
   transition:
@@ -87,6 +92,12 @@ body {
 .pixel-heart-tile:hover {
   z-index: auto;
   box-shadow: none;
+}
+
+.pixel-heart-tile,
+.pixel-heart-tile:hover {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 @keyframes pixel-heart-fill {

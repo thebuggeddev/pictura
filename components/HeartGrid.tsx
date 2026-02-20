@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ImageTile from "./ImageTile";
 import {
   getHeartImageCount,
@@ -9,13 +9,7 @@ import {
   fetchPortraitImages,
   getFallbackPortraitImages,
 } from "../lib/unsplash";
-
-const IMAGE_POSITION_OVERRIDES: Record<string, string> = {
-  "0-3":
-    "https://images.unsplash.com/photo-1623567533471-2c789007ce34?q=80&w=1335&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "1-4":
-    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=900&h=900&fit=crop&auto=format",
-};
+import PointCloudHover from "./PointCloudHover";
 
 const resolveViewport = (): HeartViewport => {
   if (typeof window === "undefined") {
@@ -30,6 +24,73 @@ const resolveViewport = (): HeartViewport => {
   return "desktop";
 };
 
+interface HoverRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+interface HoverState {
+  rect: HoverRect;
+  src: string;
+  imageElement: HTMLImageElement | null;
+}
+
+const toImageKey = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    const photoMatch = parsed.pathname.match(/\/photo-([^/?]+)/);
+    if (photoMatch?.[1]) {
+      return photoMatch[1];
+    }
+    return `${parsed.origin}${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url;
+  }
+};
+
+const dedupeAndFillImages = (incoming: string[], fallback: string[], count: number) => {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+
+  const append = (url: string) => {
+    if (!url || unique.length >= count) {
+      return;
+    }
+    const key = toImageKey(url);
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    unique.push(url);
+  };
+
+  incoming.forEach(append);
+  fallback.forEach(append);
+
+  if (unique.length < count && fallback.length > 0) {
+    for (let index = unique.length; index < count; index += 1) {
+      const cycled = fallback[index % fallback.length];
+      if (cycled) {
+        unique.push(`${cycled}&fill=${index + 1}`);
+      }
+    }
+  }
+
+  return unique.slice(0, count);
+};
+
+const getElementRect = (element: HTMLElement): HoverRect => {
+  const rect = element.getBoundingClientRect();
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+  };
+};
+
 export default function HeartGrid() {
   const [viewport, setViewport] = useState<HeartViewport>(() =>
     resolveViewport(),
@@ -40,6 +101,55 @@ export default function HeartGrid() {
     getFallbackPortraitImages(imageCount),
   );
   const clusterRef = useRef<HTMLDivElement>(null);
+  const [hoverState, setHoverState] = useState<HoverState | null>(null);
+
+  const handlePointCloudEnter = useCallback(
+    (
+      element: HTMLElement,
+      imageElement: HTMLImageElement | null,
+      src: string,
+    ) => {
+      setHoverState({
+        src,
+        imageElement,
+        rect: getElementRect(element),
+      });
+    },
+    [],
+  );
+
+  const handlePointCloudMove = useCallback(
+    (
+      element: HTMLElement,
+      imageElement: HTMLImageElement | null,
+      src: string,
+    ) => {
+      setHoverState((previous) => {
+        const nextRect = getElementRect(element);
+        if (
+          previous &&
+          previous.src === src &&
+          previous.imageElement === imageElement &&
+          Math.abs(previous.rect.left - nextRect.left) < 0.5 &&
+          Math.abs(previous.rect.top - nextRect.top) < 0.5 &&
+          Math.abs(previous.rect.width - nextRect.width) < 0.5 &&
+          Math.abs(previous.rect.height - nextRect.height) < 0.5
+        ) {
+          return previous;
+        }
+        return {
+          src,
+          imageElement,
+          rect: nextRect,
+        };
+      });
+    },
+    [],
+  );
+
+  const handlePointCloudLeave = useCallback(() => {
+    setHoverState(null);
+  }, []);
 
   useEffect(() => {
     const mobileQuery = window.matchMedia("(max-width: 767px)");
@@ -58,16 +168,30 @@ export default function HeartGrid() {
 
   useEffect(() => {
     let active = true;
-    setImages(getFallbackPortraitImages(imageCount));
+    const fallbackImages = getFallbackPortraitImages(imageCount);
+    setImages(fallbackImages);
     fetchPortraitImages(imageCount).then((response) => {
-      if (active && response.length > 0) {
-        setImages(response);
+      if (active) {
+        const nextImages = dedupeAndFillImages(response, fallbackImages, imageCount);
+        setImages(nextImages.length > 0 ? nextImages : fallbackImages);
       }
     });
     return () => {
       active = false;
     };
   }, [imageCount]);
+
+  useEffect(() => {
+    const clearHover = () => {
+      setHoverState(null);
+    };
+    window.addEventListener("scroll", clearHover, { passive: true });
+    window.addEventListener("resize", clearHover);
+    return () => {
+      window.removeEventListener("scroll", clearHover);
+      window.removeEventListener("resize", clearHover);
+    };
+  }, []);
 
   return (
     <section className="heart-scroll-trigger relative z-10 mt-1 flex w-full justify-center px-2 sm:mt-2 sm:px-0 lg:mt-3">
@@ -76,8 +200,6 @@ export default function HeartGrid() {
         className="heart-cluster relative flex flex-col items-center will-change-transform"
       >
         {rows.map((row, rowIndex) => {
-          let rowTileIndex = -1;
-
           return (
             <div
               key={row.id}
@@ -96,22 +218,28 @@ export default function HeartGrid() {
                   }}
                 >
                   {segment.tiles.map((tile) => {
-                    rowTileIndex += 1;
-                    const defaultSrc =
+                    const tileSrc =
                       tile.imageIndex >= 0
                         ? images[tile.imageIndex % images.length]
                         : images[0];
-                    const overrideSrc =
-                      IMAGE_POSITION_OVERRIDES[`${rowIndex}-${rowTileIndex}`];
-                    const tileSrc = overrideSrc ?? defaultSrc;
 
                     return (
                       <ImageTile
                         key={tile.id}
                         src={tileSrc}
+                        fallbackIndex={tile.imageIndex}
                         pixelHeart={tile.pixelHeart}
                         brightness={tile.brightness}
-                        className={`heart-grid-tile ${tile.pixelHeart ? "pixel-heart-tile" : ""}`}
+                        className={`heart-grid-tile ${tile.pixelHeart ? "pixel-heart-tile" : "point-cloud-source"}`}
+                        onPointCloudEnter={
+                          tile.pixelHeart ? undefined : handlePointCloudEnter
+                        }
+                        onPointCloudMove={
+                          tile.pixelHeart ? undefined : handlePointCloudMove
+                        }
+                        onPointCloudLeave={
+                          tile.pixelHeart ? undefined : handlePointCloudLeave
+                        }
                         alt={
                           tile.pixelHeart
                             ? "Decorative pixel heart tile"
@@ -130,6 +258,7 @@ export default function HeartGrid() {
           );
         })}
       </div>
+      <PointCloudHover hoverState={hoverState} />
     </section>
   );
 }

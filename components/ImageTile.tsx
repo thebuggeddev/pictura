@@ -1,15 +1,27 @@
-import type { CSSProperties } from "react";
+import { useMemo, useRef, type CSSProperties } from "react";
+import { CURATED_IMAGE_URLS } from "../lib/unsplash";
 
-const IMAGE_FALLBACK_URL =
-  "https://images.unsplash.com/photo-1770034285769-4a5a3f410346?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+const FALLBACK_IMAGE_URLS = CURATED_IMAGE_URLS;
 
 interface ImageTileProps {
   src: string;
   brightness: number;
   style: CSSProperties;
   alt: string;
+  fallbackIndex?: number;
   pixelHeart?: boolean;
   className?: string;
+  onPointCloudEnter?: (
+    element: HTMLElement,
+    imageElement: HTMLImageElement | null,
+    src: string,
+  ) => void;
+  onPointCloudMove?: (
+    element: HTMLElement,
+    imageElement: HTMLImageElement | null,
+    src: string,
+  ) => void;
+  onPointCloudLeave?: () => void;
 }
 
 const PIXEL_HEART_PATTERN = [
@@ -28,13 +40,74 @@ export default function ImageTile({
   brightness,
   style,
   alt,
+  fallbackIndex = 0,
   pixelHeart = false,
   className = "",
+  onPointCloudEnter,
+  onPointCloudMove,
+  onPointCloudLeave,
 }: ImageTileProps) {
+  const tileRef = useRef<HTMLElement | null>(null);
+  const fallbackBaseIndex = useMemo(() => {
+    return Math.abs(fallbackIndex) % FALLBACK_IMAGE_URLS.length;
+  }, [fallbackIndex]);
+  const imageCrossOrigin =
+    src.includes("images.unsplash.com") || src.includes("source.unsplash.com")
+    ? "anonymous"
+    : undefined;
   const tileStyle = {
     ...style,
     "--tile-brightness": brightness.toFixed(2),
   } as CSSProperties;
+
+  const getPointCloudSource = () => {
+    if (!tileRef.current) {
+      return src;
+    }
+    const imageElement = tileRef.current.querySelector("img");
+    return imageElement?.currentSrc || imageElement?.src || src;
+  };
+
+  const getImageElement = () => {
+    if (!tileRef.current) {
+      return null;
+    }
+    return tileRef.current.querySelector<HTMLImageElement>("img");
+  };
+
+  const triggerPointCloud = (
+    callback:
+      | ((
+          element: HTMLElement,
+          imageElement: HTMLImageElement | null,
+          source: string,
+        ) => void)
+      | undefined,
+  ) => {
+    if (!tileRef.current || !callback) {
+      return;
+    }
+    const imageElement = getImageElement();
+    const source = getPointCloudSource();
+    if (imageElement && imageElement.complete && imageElement.naturalWidth > 0) {
+      callback(tileRef.current, imageElement, source);
+      return;
+    }
+    if (imageElement) {
+      const handleLoad = () => {
+        if (tileRef.current) {
+          callback(
+            tileRef.current,
+            imageElement,
+            imageElement.currentSrc || imageElement.src || source,
+          );
+        }
+      };
+      imageElement.addEventListener("load", handleLoad, { once: true });
+      return;
+    }
+    callback(tileRef.current, null, source);
+  };
 
   if (pixelHeart) {
     return (
@@ -57,18 +130,38 @@ export default function ImageTile({
 
   return (
     <figure
+      ref={tileRef}
       className={`heart-tile group relative shrink-0 overflow-hidden ${className}`}
       style={tileStyle}
+      onMouseEnter={() => {
+        triggerPointCloud(onPointCloudEnter);
+      }}
+      onMouseMove={() => {
+        triggerPointCloud(onPointCloudMove);
+      }}
+      onMouseLeave={() => {
+        onPointCloudLeave?.();
+      }}
     >
       <img
         src={src}
         alt={alt}
+        crossOrigin={imageCrossOrigin}
         loading="lazy"
         decoding="async"
         onError={(event) => {
           const target = event.currentTarget;
+          const step = Number(target.dataset.fallbackStep || "0");
+          const nextIndex = (fallbackBaseIndex + step * 5) % FALLBACK_IMAGE_URLS.length;
+          const nextUrl = FALLBACK_IMAGE_URLS[nextIndex];
+
+          if (step < FALLBACK_IMAGE_URLS.length && target.src !== nextUrl) {
+            target.dataset.fallbackStep = String(step + 1);
+            target.src = nextUrl;
+            return;
+          }
+
           target.onerror = null;
-          target.src = IMAGE_FALLBACK_URL;
         }}
         className="h-full w-full object-cover [filter:brightness(var(--tile-brightness))_saturate(1.12)] transition-all duration-500 ease-premium group-hover:scale-[1.05] group-hover:[filter:brightness(calc(var(--tile-brightness)+0.12))_saturate(1.18)]"
       />
