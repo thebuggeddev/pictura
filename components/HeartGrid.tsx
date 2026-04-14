@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ImageTile from "./ImageTile";
+import FullScreenImage from "./FullScreenImage";
 import {
   getHeartImageCount,
   getHeartRows,
@@ -9,6 +10,7 @@ import {
   fetchPortraitImages,
   getFallbackPortraitImages,
 } from "../lib/unsplash";
+import { getHeartImages } from "../lib/userPhotos";
 import PointCloudHover from "./PointCloudHover";
 
 const resolveViewport = (): HeartViewport => {
@@ -98,10 +100,11 @@ export default function HeartGrid() {
   const rows = useMemo(() => getHeartRows(viewport), [viewport]);
   const imageCount = useMemo(() => getHeartImageCount(rows), [rows]);
   const [images, setImages] = useState<string[]>(() =>
-    getFallbackPortraitImages(imageCount),
+    getHeartImages(imageCount),
   );
   const clusterRef = useRef<HTMLDivElement>(null);
   const [hoverState, setHoverState] = useState<HoverState | null>(null);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   const handlePointCloudEnter = useCallback(
     (
@@ -151,6 +154,10 @@ export default function HeartGrid() {
     setHoverState(null);
   }, []);
 
+  const handleDoubleTap = useCallback((src: string) => {
+    setExpandedImage(src);
+  }, []);
+
   useEffect(() => {
     const mobileQuery = window.matchMedia("(max-width: 767px)");
     const tabletQuery = window.matchMedia("(max-width: 1200px)");
@@ -167,18 +174,7 @@ export default function HeartGrid() {
   }, []);
 
   useEffect(() => {
-    let active = true;
-    const fallbackImages = getFallbackPortraitImages(imageCount);
-    setImages(fallbackImages);
-    fetchPortraitImages(imageCount).then((response) => {
-      if (active) {
-        const nextImages = dedupeAndFillImages(response, fallbackImages, imageCount);
-        setImages(nextImages.length > 0 ? nextImages : fallbackImages);
-      }
-    });
-    return () => {
-      active = false;
-    };
+    setImages(getHeartImages(imageCount));
   }, [imageCount]);
 
   useEffect(() => {
@@ -240,6 +236,9 @@ export default function HeartGrid() {
                         onPointCloudLeave={
                           tile.pixelHeart ? undefined : handlePointCloudLeave
                         }
+                        onDoubleTap={
+                          tile.pixelHeart ? undefined : handleDoubleTap
+                        }
                         alt={
                           tile.pixelHeart
                             ? "Decorative pixel heart tile"
@@ -259,6 +258,12 @@ export default function HeartGrid() {
         })}
       </div>
       <PointCloudHover hoverState={hoverState} />
+      {expandedImage && (
+        <FullScreenImage
+          src={expandedImage}
+          onClose={() => setExpandedImage(null)}
+        />
+      )}
     </section>
   );
 }

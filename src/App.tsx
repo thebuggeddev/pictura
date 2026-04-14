@@ -1,15 +1,42 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BackgroundGlow from "../components/BackgroundGlow";
 import Header from "../components/Header";
 import HeartGrid from "../components/HeartGrid";
 import HeroText from "../components/HeroText";
+import Carousel from "../components/Carousel";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [showCarousel, setShowCarousel] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const resetTimer = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (!showCarousel) {
+        timerRef.current = setTimeout(() => setShowCarousel(true), 30000);
+      }
+    };
+
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+    window.addEventListener('mousedown', resetTimer);
+    window.addEventListener('touchstart', resetTimer);
+    
+    resetTimer();
+
+    return () => {
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+      window.removeEventListener('mousedown', resetTimer);
+      window.removeEventListener('touchstart', resetTimer);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [showCarousel]);
 
   useLayoutEffect(() => {
     const context = gsap.context(() => {
@@ -167,6 +194,27 @@ export default function App() {
           scrub: 1.1,
         },
       });
+
+      // Add a subtle floating animation to the entire cluster
+      gsap.to(".heart-cluster", {
+        y: "+=15",
+        x: "+=5",
+        rotation: 0.5,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      // Add floating to the hero text
+      gsap.to([".hero-left", ".hero-right"], {
+        y: "+=8",
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: 0.5
+      });
     }, rootRef);
 
     return () => context.revert();
@@ -185,6 +233,10 @@ export default function App() {
           <HeartGrid />
           <HeroText />
         </main>
+
+        {showCarousel && (
+          <Carousel onClose={() => setShowCarousel(false)} />
+        )}
       </div>
     </div>
   );

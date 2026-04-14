@@ -32,38 +32,38 @@ interface HeartRowBlueprint {
 }
 
 const DESKTOP_BLUEPRINT: HeartRowBlueprint[] = [
-  { segments: [2, 2], size: 94, gap: 7, segmentGap: 40, rowGap: 9 },
-  { segments: [7], size: 81, gap: 6, rowGap: 8 },
-  { segments: [7], size: 63, gap: 6, rowGap: 8, pixelHeartAt: 3 },
-  { segments: [7], size: 53, gap: 6, rowGap: 7 },
-  { segments: [8], size: 34, gap: 5, rowGap: 10 },
-  { segments: [8], size: 29, gap: 7, rowGap: 10 },
-  { segments: [6], size: 27, gap: 4, rowGap: 6 },
-  { segments: [4], size: 25, gap: 4, rowGap: 5 },
-  { segments: [2], size: 22, gap: 3, rowGap: 0 },
+  { segments: [2, 2], size: 136, gap: 7, segmentGap: 40, rowGap: 9 },
+  { segments: [7], size: 116, gap: 6, rowGap: 8 },
+  { segments: [7], size: 91, gap: 6, rowGap: 8, pixelHeartAt: 3 },
+  { segments: [7], size: 77, gap: 6, rowGap: 7 },
+  { segments: [8], size: 49, gap: 5, rowGap: 10 },
+  { segments: [8], size: 42, gap: 7, rowGap: 10 },
+  { segments: [6], size: 38, gap: 4, rowGap: 6 },
+  { segments: [4], size: 36, gap: 4, rowGap: 5 },
+  { segments: [2], size: 31, gap: 3, rowGap: 0 },
 ];
 
 const MOBILE_BLUEPRINT: HeartRowBlueprint[] = [
-  { segments: [2, 2], size: 61, gap: 4, segmentGap: 24, rowGap: 7 },
+  { segments: [2, 2], size: 88, gap: 4, segmentGap: 24, rowGap: 7 },
+  { segments: [6], size: 71, gap: 4, rowGap: 6 },
+  { segments: [6], size: 58, gap: 4, rowGap: 6, pixelHeartAt: 3 },
   { segments: [6], size: 49, gap: 4, rowGap: 6 },
-  { segments: [6], size: 40, gap: 4, rowGap: 6, pixelHeartAt: 3 },
-  { segments: [6], size: 34, gap: 4, rowGap: 6 },
-  { segments: [7], size: 26, gap: 3, rowGap: 7 },
-  { segments: [6], size: 22, gap: 5, rowGap: 7 },
-  { segments: [4], size: 20, gap: 3, rowGap: 4 },
-  { segments: [2], size: 18, gap: 3, rowGap: 0 },
+  { segments: [7], size: 37, gap: 3, rowGap: 7 },
+  { segments: [6], size: 31, gap: 5, rowGap: 7 },
+  { segments: [4], size: 29, gap: 3, rowGap: 4 },
+  { segments: [2], size: 26, gap: 3, rowGap: 0 },
 ];
 
 const TABLET_BLUEPRINT: HeartRowBlueprint[] = [
-  { segments: [2, 2], size: 81, gap: 6, segmentGap: 34, rowGap: 9 },
-  { segments: [7], size: 69, gap: 5, rowGap: 8 },
-  { segments: [7], size: 55, gap: 5, rowGap: 8, pixelHeartAt: 3 },
-  { segments: [7], size: 47, gap: 5, rowGap: 7 },
-  { segments: [8], size: 30, gap: 4, rowGap: 9 },
-  { segments: [8], size: 27, gap: 6, rowGap: 9 },
-  { segments: [6], size: 25, gap: 4, rowGap: 6 },
-  { segments: [4], size: 22, gap: 3, rowGap: 5 },
-  { segments: [2], size: 20, gap: 3, rowGap: 0 },
+  { segments: [2, 2], size: 116, gap: 6, segmentGap: 34, rowGap: 9 },
+  { segments: [7], size: 100, gap: 5, rowGap: 8 },
+  { segments: [7], size: 79, gap: 5, rowGap: 8, pixelHeartAt: 3 },
+  { segments: [7], size: 67, gap: 5, rowGap: 7 },
+  { segments: [8], size: 43, gap: 4, rowGap: 9 },
+  { segments: [8], size: 38, gap: 6, rowGap: 9 },
+  { segments: [6], size: 36, gap: 4, rowGap: 6 },
+  { segments: [4], size: 31, gap: 3, rowGap: 5 },
+  { segments: [2], size: 29, gap: 3, rowGap: 0 },
 ];
 
 const createHeartRows = (blueprint: HeartRowBlueprint[]): HeartRow[] => {

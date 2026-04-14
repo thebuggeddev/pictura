@@ -22,6 +22,7 @@ interface ImageTileProps {
     src: string,
   ) => void;
   onPointCloudLeave?: () => void;
+  onDoubleTap?: (src: string) => void;
 }
 
 const PIXEL_HEART_PATTERN = [
@@ -46,6 +47,7 @@ export default function ImageTile({
   onPointCloudEnter,
   onPointCloudMove,
   onPointCloudLeave,
+  onDoubleTap,
 }: ImageTileProps) {
   const tileRef = useRef<HTMLElement | null>(null);
   const fallbackBaseIndex = useMemo(() => {
@@ -131,7 +133,7 @@ export default function ImageTile({
   return (
     <figure
       ref={tileRef}
-      className={`heart-tile group relative shrink-0 overflow-hidden ${className}`}
+      className={`heart-tile group relative shrink-0 cursor-pointer overflow-hidden ${className}`}
       style={tileStyle}
       onMouseEnter={() => {
         triggerPointCloud(onPointCloudEnter);
@@ -141,6 +143,11 @@ export default function ImageTile({
       }}
       onMouseLeave={() => {
         onPointCloudLeave?.();
+      }}
+      onDoubleClick={() => {
+        if (onDoubleTap) {
+          onDoubleTap(src);
+        }
       }}
     >
       <img
