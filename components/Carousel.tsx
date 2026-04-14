@@ -30,8 +30,8 @@ export default function Carousel({ onClose }: CarouselProps) {
       />
       
       {/* Main Image */}
-      <div className="relative z-[210] flex h-full w-full flex-col items-center justify-center p-4 sm:p-8">
-        <div className="relative aspect-[3/4] h-full max-h-[80vh] overflow-hidden rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div className="relative z-[210] flex h-full w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="relative aspect-[3/4] w-full max-w-[min(90vw,450px)] overflow-hidden rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] sm:h-full sm:max-h-[80vh] sm:w-auto">
           {images.map((src, index) => (
             <img
               key={src}
@@ -44,22 +44,22 @@ export default function Carousel({ onClose }: CarouselProps) {
           ))}
         </div>
         
-        <div className="mt-8 text-center text-white/60">
-          <p className="font-serifDisplay text-2xl tracking-widest text-white/90">Our Memories</p>
-          <p className="mt-2 text-sm tracking-[0.2em] uppercase">Happy One Year</p>
+        <div className="mt-6 text-center text-white/60 sm:mt-8">
+          <p className="font-serifDisplay text-xl tracking-widest text-white/90 sm:text-2xl">Our Memories</p>
+          <p className="mt-1 text-[10px] tracking-[0.2em] uppercase sm:mt-2 sm:text-xs">Happy One Year</p>
         </div>
       </div>
 
       {/* Exit Button */}
       <button
         onClick={onClose}
-        className="absolute bottom-10 z-[220] rounded-full border border-white/20 bg-black/40 px-8 py-3 text-sm font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+        className="absolute bottom-12 z-[220] rounded-full border border-white/20 bg-black/40 px-6 py-2.5 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white sm:bottom-10 sm:px-8 sm:py-3 sm:text-sm"
       >
         Back to Grid
       </button>
 
       {/* Progress Indicators */}
-      <div className="absolute bottom-4 left-1/2 z-[220] flex -translate-x-1/2 gap-1.5">
+      <div className="absolute bottom-6 left-1/2 z-[220] flex -translate-x-1/2 gap-1.5 sm:bottom-4">
         {images.slice(0, 10).map((_, i) => (
           <div 
             key={i}
