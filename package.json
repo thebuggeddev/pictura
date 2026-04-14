@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run sync-photos && tsc --noEmit && vite build",
     "preview": "vite preview",
     "sync-photos": "node scripts/sync-photos.js"
   },
@@ -16,6 +16,7 @@
     "three": "^0.179.1"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@types/three": "^0.183.0",
