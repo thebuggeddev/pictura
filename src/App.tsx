@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function App() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [showCarousel, setShowCarousel] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<any>(null);
 
   useEffect(() => {
     const resetTimer = () => {
